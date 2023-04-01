@@ -109,6 +109,11 @@ int main(int argc, char* argv[]) noexcept {
       ->description("Disable the build cache")
       ->group("Optimizations");
 
+  //ERIC
+  app.add_flag_callback("--frontier", [] { options::frontier = true; })
+      ->description("Frontier")
+      ->group("Optimizations");
+
   /************* Build Subcommand *************/
   auto build = app.add_subcommand("build", "Perform a build (default)");
 

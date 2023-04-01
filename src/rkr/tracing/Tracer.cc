@@ -554,11 +554,17 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
 
         //ERIC WAS HERE
       } else if (SyscallTable<Build>::get(i).isBlocked()) {
-          bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
-          //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
-          //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | (SIGSYS & SECCOMP_RET_DATA)));
-          bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
-          //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
+          // If in frontier mode, allow execution of network calls and continue tracing
+          // If not, exit with SIGSYS
+          if (options::frontier) {
+            bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+            bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
+            //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
+          } else {
+            bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+            bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
+            std::exit(159);
+          }
       } else {
         if (SyscallTable<Build>::get(i).isTraced()) {
           // Check if the syscall matches the current entry. If it matches, trace the syscall.
