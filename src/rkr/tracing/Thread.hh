@@ -353,6 +353,21 @@ class Thread {
                  at_flags flags) noexcept;
 
   // Socket Operations
+  // ERIC
+  void _connect(Build& build,
+                const IRSource& source,
+                int sockfd,
+                const struct sockaddr* addr,
+                socklen_t addrlen) noexcept {
+      FAIL << "connect not done yet.";
+  }
+  void _accept(Build& build,
+             const IRSource& source,
+             int sockfd,
+             struct sockaddr* addr,
+             socklen_t* addrlen) noexcept {
+    FAIL << "accept not done yet";
+}
   void _recvfrom(Build& build,
                  const IRSource& source,
                  int sockfd,
@@ -388,6 +403,7 @@ class Thread {
     FAIL << "sendto(2) not yet implemented.";
   }
   void _socket(Build& build, const IRSource& source, int domain, int type, int protocol) noexcept;
+  void _getsockname(Build& build, const IRSource& source, int domain, int type, int protocol) noexcept;
   void _socketpair(Build& build,
                    const IRSource& source,
                    int domain,

@@ -384,20 +384,24 @@ void Thread::_openat(Build& build,
                      o_flags flags,
                      mode_flags mode) noexcept {
   LOGF(trace, "{}: openat({}={}, {}, {}, {})", *this, dfd, getPath(dfd), filename, flags, mode);
+WARN << "1 OPENAT";
 
   // If the O_CREAT was specified and filename has a trailing slash, the result is EISDIR and we
   // do not need to trace any interaction here
   if (flags.creat() && filename.filename().empty()) {
+WARN << "1.1 OPENAT";
     resume();
     return;
   }
 
   // If the provided name is too long, the result is ENAMETOOLONG and we can do nothing
   if (filename.string().length() > NAME_MAX) {
+WARN << "1.2 OPENAT";
     resume();
     return;
   }
 
+WARN << "1.3 OPENAT";
   // Get a reference from the given path
   // Attempt to get an artifact using this reference *BEFORE* running the syscall.
   // This will ensure the environment knows whether or not this artifact is created
@@ -409,6 +413,7 @@ void Thread::_openat(Build& build,
   if (ref->isResolved() && ref_flags.truncate) {
     ref->getArtifact()->beforeTruncate(build, source, getCommand(), ref_id);
   }
+WARN << "1.4 OPENAT";
 
   // If the open call will fail, just run it and don't wait for completion
   // We can't skip the call because it could still have a side effect
@@ -417,11 +422,14 @@ void Thread::_openat(Build& build,
     build.expectResult(source, getCommand(), Scenario::Build, ref_id, ref->getResultCode());
     return;
   }
+WARN << "1.5 OPENAT";
 
   // Allow the syscall to finish
   finishSyscall([=](Build& build, const IRSource& source, long fd) {
     // Let the process continue
     resume();
+
+WARN << "2 OPENAT FD: " << fd;
 
     // Check whether the openat call succeeded or failed
     if (fd >= 0) {
@@ -1510,6 +1518,26 @@ void Thread::_socket(Build& build,
                      int type,
                      int protocol) noexcept {
   WARN << "socket(2) not yet implemented. Emulating as an anonymous file.";
+
+  finishSyscall([=](Build& build, const IRSource& source, long rc) {
+    resume();
+
+    if (rc >= 0) {
+    WARN << "RC ZEROO" << rc;
+      auto ref = getCommand()->nextRef();
+    WARN << "REF" << ref;
+      build.fileRef(source, getCommand(), 0600, ref);
+      bool cloexec = (type & SOCK_CLOEXEC) == SOCK_CLOEXEC;
+      _process->addFD(build, source, rc, ref, cloexec);
+    }
+  });
+}
+void Thread::_getsockname(Build& build,
+                     const IRSource& source,
+                     int domain,
+                     int type,
+                     int protocol) noexcept {
+  WARN << "getsockname(2) not yet implemented. Emulating as an anonymous file.";
 
   finishSyscall([=](Build& build, const IRSource& source, long rc) {
     resume();

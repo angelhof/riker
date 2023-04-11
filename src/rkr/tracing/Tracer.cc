@@ -70,6 +70,7 @@ shared_ptr<Process> Tracer::start(Build& build, const shared_ptr<Command>& cmd) 
 }
 
 optional<tuple<pid_t, int>> Tracer::getEvent(Build& build) noexcept {
+WARN << "getEvent starts";
   // Check if any queued events are ready to be processed
   for (auto iter = _event_queue.cbegin(); iter != _event_queue.cend(); iter++) {
     auto [child, wait_status] = *iter;
@@ -87,6 +88,7 @@ optional<tuple<pid_t, int>> Tracer::getEvent(Build& build) noexcept {
   // size_t spin_count = 0;
 
   // Wait for an event from ptrace
+    WARN << "while loop starts";
   while (true) {
     // Check the shared memory channel
     if (_shmem != nullptr) {
@@ -151,6 +153,7 @@ optional<tuple<pid_t, int>> Tracer::getEvent(Build& build) noexcept {
       }
     }*/
   }
+  WARN << "while loop ends";
 }
 
 void Tracer::wait(Build& build, shared_ptr<Process> p) noexcept {
@@ -384,10 +387,10 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
   const auto& entry = SyscallTable<Build>::get(regs.SYSCALL_NUMBER);
 
-  // WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
-  // t.getCommand();
+   WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
+   t.getCommand();
 
-  if (entry.isTraced()) {
+  if (entry.isTraced() || entry.isBlocked()) {
     LOG(trace) << t << ": stopped on syscall " << entry.getName();
 
     if (options::syscall_stats) {
@@ -400,6 +403,7 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
     // Run the system call handler
     entry.runHandler(build, TracedIRSource(), t, regs);
+    LOG(trace) << t << ": stopped on syscall XYZ" << entry.getName();
 
   } else {
     FAIL << "Traced system call number " << regs.SYSCALL_NUMBER << " in " << t;
@@ -557,16 +561,17 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
           // If in frontier mode, allow execution of network calls and continue tracing
           // If not, exit with SIGSYS
           if (options::frontier) {
+            std::cout << "ABCD";
             bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
-            bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
-            //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
+            //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
+            bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
           } else {
             bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
             bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
             std::exit(159);
           }
       } else {
-        if (SyscallTable<Build>::get(i).isTraced()) {
+        if (SyscallTable<Build>::get(i).isTraced() || SyscallTable<Build>::get(i).isBlocked()) {
           // Check if the syscall matches the current entry. If it matches, trace the syscall.
           bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
           bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));

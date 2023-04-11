@@ -46,18 +46,18 @@
 /* 039 */ // skip getpid (__NR_getpid)
 /* 040 */ TRACE(__NR_sendfile, sendfile);
 /* 041 */ // ERIC TRACE(__NR_socket, socket);
-/* 041 */ BLOCK(__NR_socket, socket);
-/* 042 */ BLOCK(__NR_connect, connect);
-/* 043 */ BLOCK(__NR_accept, accept);
-/* 044 */ BLOCK(__NR_sendto, sendto);
-/* 045 */ BLOCK(__NR_recvfrom, recvfrom);
-/* 046 */ BLOCK(__NR_sendmsg, sendmsg);
-/* 047 */ BLOCK(__NR_recvmsg, recvmsg);
+/* 041 */ TRACE(__NR_socket, socket);
+/* 042 */ TRACE(__NR_connect, connect);
+/* 043 */ TRACE(__NR_accept, accept);
+/* 044 */ TRACE(__NR_sendto, sendto);
+/* 045 */ TRACE(__NR_recvfrom, recvfrom);
+/* 046 */ TRACE(__NR_sendmsg, sendmsg);
+/* 047 */ TRACE(__NR_recvmsg, recvmsg);
 /* 048 */ // skip shutdown (__NR_shutdown)
 /* 049 */ // skip bind (__NR_bind)
 /* 050 */ // skip listen (__NR_listen)
 /* 051 */ // skip getsockname (__NR_getsockname)
-/* 051 */ BLOCK(__NR_getsockname, getsockname);
+/* 051 */ TRACE(__NR_getsockname, getsockname);
 /* 052 */ // skip getpeername (__NR_getpeername)
 /* 053 */ TRACE(__NR_socketpair, socketpair);
 /* 054 */ // skip setsockopt (__NR_setsockopt)
