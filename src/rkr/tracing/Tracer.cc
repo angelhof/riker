@@ -70,7 +70,6 @@ shared_ptr<Process> Tracer::start(Build& build, const shared_ptr<Command>& cmd) 
 }
 
 optional<tuple<pid_t, int>> Tracer::getEvent(Build& build) noexcept {
-WARN << "getEvent starts";
   // Check if any queued events are ready to be processed
   for (auto iter = _event_queue.cbegin(); iter != _event_queue.cend(); iter++) {
     auto [child, wait_status] = *iter;
@@ -385,8 +384,8 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
   const auto& entry = SyscallTable<Build>::get(regs.SYSCALL_NUMBER);
 
-   WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
-   t.getCommand();
+   //WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
+   //t.getCommand();
 
   if (entry.isTraced() || entry.isBlocked()) {
     LOG(trace) << t << ": stopped on syscall " << entry.getName();

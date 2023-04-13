@@ -1515,9 +1515,7 @@ void Thread::_socket(Build& build,
     resume();
 
     if (rc >= 0) {
-    WARN << "RC ZEROO" << rc;
       auto ref = getCommand()->nextRef();
-    WARN << "REF" << ref;
       build.fileRef(source, getCommand(), 0600, ref);
       bool cloexec = (type & SOCK_CLOEXEC) == SOCK_CLOEXEC;
       _process->addFD(build, source, rc, ref, cloexec);
@@ -1736,6 +1734,20 @@ void Thread::_waitid(Build& build,
                      siginfo_t* infop,
                      int options) noexcept {
   LOGF(trace, "{}: waitid(...)", *this);
-  WARN << "waitid syscall is not handled yet";
-  resume();
-}
+    
+      finishSyscall([=](Build& build, const IRSource& source, long rc) {
+     resume();
+    
+     // If the syscall failed or returned immediately after WNOHANG, stop processing
+     if (rc <= 0) return;
+    
+     // Get the process that was returned
+     auto exited = _tracer.getExited(rc);
+    
+     ASSERT(exited) << "waitid syscall returned an untracked PID " << rc;
+    
+     if (exited->getCommand() != getCommand()) {
+        build.join(source, getCommand(), exited->getCommand(), 0);
+     }
+      });
+    }
