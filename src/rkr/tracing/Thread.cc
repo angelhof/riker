@@ -1744,6 +1744,6 @@ void Thread::_waitid(Build& build,
                      siginfo_t* infop,
                      int options) noexcept {
   LOGF(trace, "{}: waitid(...)", *this);
-  FAIL << "waitid syscall is not handled yet";
+  WARN << "waitid syscall is not handled yet";
   resume();
 }

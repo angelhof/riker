@@ -88,7 +88,6 @@ WARN << "getEvent starts";
   // size_t spin_count = 0;
 
   // Wait for an event from ptrace
-    WARN << "while loop starts";
   while (true) {
     // Check the shared memory channel
     if (_shmem != nullptr) {
@@ -153,7 +152,6 @@ WARN << "getEvent starts";
       }
     }*/
   }
-  WARN << "while loop ends";
 }
 
 void Tracer::wait(Build& build, shared_ptr<Process> p) noexcept {
