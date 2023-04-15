@@ -387,7 +387,7 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
    //WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
    //t.getCommand();
 
-  if (entry.isTraced() || entry.isBlocked()) {
+  if (entry.isTraced()) {
     LOG(trace) << t << ": stopped on syscall " << entry.getName();
 
     if (options::syscall_stats) {
@@ -400,7 +400,7 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
     // Run the system call handler
     entry.runHandler(build, TracedIRSource(), t, regs);
-    LOG(trace) << t << ": stopped on syscall XYZ" << entry.getName();
+    LOG(trace) << t << ": stopped on syscall" << entry.getName();
 
   } else {
     FAIL << "Traced system call number " << regs.SYSCALL_NUMBER << " in " << t;
@@ -553,22 +553,24 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
         bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
         bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
 
-        //ERIC WAS HERE
-      } else if (SyscallTable<Build>::get(i).isBlocked()) {
-          // If in frontier mode, allow execution of network calls and continue tracing
-          // If not, exit with SIGSYS
-          if (options::frontier) {
-            std::cout << "ABCD";
-            bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
-            //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
-            bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
-          } else {
-            bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
-            bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
-            std::exit(159);
-          }
       } else {
-        if (SyscallTable<Build>::get(i).isTraced() || SyscallTable<Build>::get(i).isBlocked()) {
+        //ERIC
+        if (SyscallTable<Build>::get(i).isTraced()) {
+          std::vector<std::string> blockedCalls{"socket", "connect", "sendto"};
+          if (!options::frontier) {
+            if (std::find(std::begin(blockedCalls), std::end(blockedCalls), SyscallTable<Build>::get(i).getName()) != std::end(blockedCalls)) {
+              WARN << "Attempted to call blocked syscall outside of frontier, exiting.. Call: " << SyscallTable<Build>::get(i).getName();
+              bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+              bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
+              std::exit(159);
+            }
+          }
+
+          // If this syscall is traced, jump to the trace handler
+          bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+          bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
+
+
           // Check if the syscall matches the current entry. If it matches, trace the syscall.
           bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
           bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
