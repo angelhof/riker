@@ -556,7 +556,7 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
       } else {
         //ERIC
         if (SyscallTable<Build>::get(i).isTraced()) {
-          std::vector<std::string> blockedCalls{"socket", "connect", "sendto"};
+          std::vector<std::string> blockedCalls{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername", "bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "recvmmsg", "sendto", "sendmsg", "sendmmsg", "sethostname", "setdomainname", "bpf"};
           if (!options::frontier) {
             if (std::find(std::begin(blockedCalls), std::end(blockedCalls), SyscallTable<Build>::get(i).getName()) != std::end(blockedCalls)) {
               WARN << "Attempted to call blocked syscall outside of frontier, exiting.. Call: " << SyscallTable<Build>::get(i).getName();
