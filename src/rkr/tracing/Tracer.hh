@@ -36,6 +36,9 @@ class Tracer {
   std::shared_ptr<Process> getExited(pid_t pid) noexcept;
 
  private:
+  // [pash] List of calls to block
+  std::vector<std::string> blockedCalls{"socket", "socketpair", "setsockopt", "getsockopt", "getsockname", "getpeername", "bind", "listen", "accept", "accept4", "connect", "shutdown", "recvfrom", "recvmsg", "recvmmsg", "sendto", "sendmsg", "sendmmsg", "sethostname", "setdomainname", "bpf"};
+
   /// Get the next available traced event
   std::optional<std::tuple<pid_t, int>> getEvent(Build& build) noexcept;
 
