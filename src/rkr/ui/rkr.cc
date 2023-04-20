@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) noexcept {
       ->description("Disable the build cache")
       ->group("Optimizations");
 
-  //ERIC
+  // [pash]
   app.add_flag_callback("--frontier", [] { options::frontier = true; })
       ->description("Frontier")
       ->group("Optimizations");

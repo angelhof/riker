@@ -353,7 +353,7 @@ class Thread {
                  at_flags flags) noexcept;
 
   // Socket Operations
-  // ERIC
+  // [pash]
   void _connect(Build& build,
                 const IRSource& source,
                 int sockfd,

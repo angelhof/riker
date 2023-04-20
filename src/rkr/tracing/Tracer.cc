@@ -554,7 +554,7 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
         bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
 
       } else {
-        //ERIC
+        // [pash]
         if (SyscallTable<Build>::get(i).isTraced()) {
           if (!options::frontier) {
             if (std::find(std::begin(blockedCalls), std::end(blockedCalls), SyscallTable<Build>::get(i).getName()) != std::end(blockedCalls)) {
