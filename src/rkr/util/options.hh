@@ -32,6 +32,9 @@ namespace options {
   /// Enable file-staging cache
   inline bool enable_cache = true;
 
+  /// Eric: Enable frontier mode
+  inline bool frontier = false;
+
   /// Inject the shared memory tracing library
   inline bool inject_tracing_lib = true;
 

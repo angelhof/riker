@@ -384,8 +384,8 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
   const auto& entry = SyscallTable<Build>::get(regs.SYSCALL_NUMBER);
 
-  // WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
-  // t.getCommand();
+   //WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
+   //t.getCommand();
 
   if (entry.isTraced()) {
     LOG(trace) << t << ": stopped on syscall " << entry.getName();
@@ -400,6 +400,7 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
     // Run the system call handler
     entry.runHandler(build, TracedIRSource(), t, regs);
+    LOG(trace) << t << ": stopped on syscall" << entry.getName();
 
   } else {
     FAIL << "Traced system call number " << regs.SYSCALL_NUMBER << " in " << t;
@@ -552,15 +553,23 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
         bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
         bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
 
-        //ERIC WAS HERE
-      } else if (SyscallTable<Build>::get(i).isBlocked()) {
-          bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
-          //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ALLOW));
-          //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_ERRNO | (SIGSYS & SECCOMP_RET_DATA)));
-          bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
-          //bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
       } else {
+        // [pash]
         if (SyscallTable<Build>::get(i).isTraced()) {
+          if (!options::frontier) {
+            if (std::find(std::begin(blockedCalls), std::end(blockedCalls), SyscallTable<Build>::get(i).getName()) != std::end(blockedCalls)) {
+              WARN << "Attempted to call blocked syscall outside of frontier, exiting.. Call: " << SyscallTable<Build>::get(i).getName();
+              bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+              bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
+              std::exit(159);
+            }
+          }
+
+          // If this syscall is traced, jump to the trace handler
+          bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+          bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));
+
+
           // Check if the syscall matches the current entry. If it matches, trace the syscall.
           bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
           bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_TRACE));

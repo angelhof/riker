@@ -1511,6 +1511,29 @@ void Thread::_socket(Build& build,
                      int protocol) noexcept {
   WARN << "socket(2) not yet implemented. Emulating as an anonymous file.";
 
+  //if (!options::frontier) {
+  //  WARN << "IN FRONTIER MODE, SOCKET CALLED, EXITTING";
+  //  std::exit(159);
+  //}
+
+  finishSyscall([=](Build& build, const IRSource& source, long rc) {
+    resume();
+
+    if (rc >= 0) {
+      auto ref = getCommand()->nextRef();
+      build.fileRef(source, getCommand(), 0600, ref);
+      bool cloexec = (type & SOCK_CLOEXEC) == SOCK_CLOEXEC;
+      _process->addFD(build, source, rc, ref, cloexec);
+    }
+  });
+}
+void Thread::_getsockname(Build& build,
+                     const IRSource& source,
+                     int domain,
+                     int type,
+                     int protocol) noexcept {
+  WARN << "getsockname(2) not yet implemented. Emulating as an anonymous file.";
+
   finishSyscall([=](Build& build, const IRSource& source, long rc) {
     resume();
 
@@ -1716,6 +1739,20 @@ void Thread::_waitid(Build& build,
                      siginfo_t* infop,
                      int options) noexcept {
   LOGF(trace, "{}: waitid(...)", *this);
-  FAIL << "waitid syscall is not handled yet";
-  resume();
-}
+    
+      finishSyscall([=](Build& build, const IRSource& source, long rc) {
+     resume();
+    
+     // If the syscall failed or returned immediately after WNOHANG, stop processing
+     if (rc <= 0) return;
+    
+     // Get the process that was returned
+     auto exited = _tracer.getExited(rc);
+    
+     ASSERT(exited) << "waitid syscall returned an untracked PID " << rc;
+    
+     if (exited->getCommand() != getCommand()) {
+        build.join(source, getCommand(), exited->getCommand(), 0);
+     }
+      });
+    }

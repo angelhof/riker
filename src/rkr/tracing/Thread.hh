@@ -353,6 +353,23 @@ class Thread {
                  at_flags flags) noexcept;
 
   // Socket Operations
+  // [pash]
+  void _connect(Build& build,
+                const IRSource& source,
+                int sockfd,
+                const struct sockaddr* addr,
+                socklen_t addrlen) noexcept {
+      WARN << "connect not done yet.";
+      finishSyscall([=](Build& build, const IRSource& source, long rc) { resume(); });
+  }
+  void _accept(Build& build,
+             const IRSource& source,
+             int sockfd,
+             struct sockaddr* addr,
+             socklen_t* addrlen) noexcept {
+    WARN << "accept not done yet";
+      finishSyscall([=](Build& build, const IRSource& source, long rc) { resume(); });
+}
   void _recvfrom(Build& build,
                  const IRSource& source,
                  int sockfd,
@@ -361,21 +378,24 @@ class Thread {
                  int flags,
                  struct sockaddr* src_addr,
                  socklen_t* addrlen) noexcept {
-    FAIL << "recvfrom(2) not yet implemented.";
+    WARN << "recvfrom(2) not yet implemented.";
+      finishSyscall([=](Build& build, const IRSource& source, long rc) { resume(); });
   }
   void _recvmsg(Build& build,
                 const IRSource& source,
                 int sockfd,
                 struct msghdr* msg,
                 int flags) noexcept {
-    FAIL << "recvmsg(2) not yet implemented.";
+    WARN << "recvmsg(2) not yet implemented.";
+      finishSyscall([=](Build& build, const IRSource& source, long rc) { resume(); });
   }
   void _sendmsg(Build& build,
                 const IRSource& source,
                 int sockfd,
                 const struct msghdr* msg,
                 int flags) {
-    FAIL << "sendmsg(2) not yet implemented.";
+    WARN << "sendmsg(2) not yet implemented.";
+      finishSyscall([=](Build& build, const IRSource& source, long rc) { resume(); });
   }
   void _sendto(Build& build,
                const IRSource& source,
@@ -385,9 +405,11 @@ class Thread {
                int flags,
                const struct sockaddr* dest_addr,
                socklen_t addrlen) {
-    FAIL << "sendto(2) not yet implemented.";
+    WARN << "sendto(2) not yet implemented.";
+      finishSyscall([=](Build& build, const IRSource& source, long rc) { resume(); });
   }
   void _socket(Build& build, const IRSource& source, int domain, int type, int protocol) noexcept;
+  void _getsockname(Build& build, const IRSource& source, int domain, int type, int protocol) noexcept;
   void _socketpair(Build& build,
                    const IRSource& source,
                    int domain,
