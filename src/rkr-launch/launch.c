@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #define Buildfile "Rikerfile"
-#define ShellCommand "/bin/sh"
+#define ShellCommand "/bin/bash"
 
 int main(int argc, char** argv) {
   // First, try to execute the root build file
