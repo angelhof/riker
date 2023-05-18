@@ -1511,11 +1511,6 @@ void Thread::_socket(Build& build,
                      int protocol) noexcept {
   WARN << "socket(2) not yet implemented. Emulating as an anonymous file.";
 
-  //if (!options::frontier) {
-  //  WARN << "IN FRONTIER MODE, SOCKET CALLED, EXITTING";
-  //  std::exit(159);
-  //}
-
   finishSyscall([=](Build& build, const IRSource& source, long rc) {
     resume();
 
