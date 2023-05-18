@@ -13,7 +13,6 @@
 #include "runtime/env.hh"
 #include "tracing/Tracer.hh"
 #include "ui/commands.hh"
-#include "util/constants.hh"
 #include "util/stats.hh"
 
 namespace fs = std::filesystem;
@@ -32,14 +31,16 @@ using std::vector;
  */
 void do_build(vector<string> args,
               optional<fs::path> stats_log_path,
-              string command_output) noexcept {
+              string command_output,
+              fs::path dbDir) noexcept {
   // Make sure the output directory exists
-  std::cout << "g1 " << constants::OutputDir;
-  fs::create_directories(constants::OutputDir);
+  auto outputDir = dbDir;
+  auto CacheDir = dbDir / "cache";
+  auto DatabaseFilename = dbDir / "db";
+  fs::create_directories(outputDir);
 
   // Also ensure that the cache directory exists
-  fs::create_directory(constants::CacheDir);
-  std::cout << "g2 " << constants::CacheDir;
+  fs::create_directory(CacheDir);
 
   // Set up an ostream to print to if necessary
   unique_ptr<ostream> print_to;
@@ -62,7 +63,7 @@ void do_build(vector<string> args,
   LOG(phase) << "Starting build phase 0";
 
   // Is there a trace to load?
-  if (auto loaded = TraceReader::load(constants::DatabaseFilename); loaded) {
+  if (auto loaded = TraceReader::load(DatabaseFilename); loaded) {
     // Yes. Remember the root command
     root_cmd = loaded->getRootCommand();
 
@@ -145,7 +146,7 @@ void do_build(vector<string> args,
     LOG(phase) << "Starting post-build checks";
 
     // Run the post-build checks and send the resulting trace directly to output
-    PostBuildChecker<TraceWriter> output(constants::DatabaseFilename);
+    PostBuildChecker<TraceWriter> output(DatabaseFilename);
 
     // Reset the environment
     env::rollback();

@@ -114,7 +114,9 @@ int main(int argc, char* argv[]) noexcept {
       ->description("Frontier")
       ->group("Optimizations");
 
-  app.add_option("--db", options::db_dir,
+  
+  fs::path db_dir = ".rkr";
+  app.add_option("--db", db_dir,
       "Path to put the riker db and other temp files")
       ->type_name("FILE");
 
@@ -204,24 +206,23 @@ int main(int argc, char* argv[]) noexcept {
   // every argument in std::ref to pass values by reference.
 
   // build subcommand
-  build->final_callback([&] { do_build(args, stats_log, command_output); });
+  build->final_callback([&] { do_build(args, stats_log, command_output, db_dir); });
   // audit subcommand
   audit->final_callback([&] { do_audit(args, command_output); });
   // check subcommand
-  check->final_callback([&] { do_check(args); });
+  check->final_callback([&] { do_check(args, db_dir); });
   // trace subcommand
-  trace->final_callback([&] { do_trace(args, trace_output); });
+  trace->final_callback([&] { do_trace(args, trace_output, db_dir); });
   // graph subcommand
-  graph->final_callback([&] { do_graph(args, graph_output, graph_type, show_all, no_render); });
+  graph->final_callback([&] { do_graph(args, graph_output, graph_type, show_all, no_render, db_dir); });
   // stats subcommand
-  stats->final_callback([&] { do_stats(args, list_artifacts); });
+  stats->final_callback([&] { do_stats(args, list_artifacts, db_dir); });
 
   /************* Argument Parsing *************/
 
   try {
     // Try to parse the arguments as-is
     app.parse(argc, argv);
-    std::cout << options::db_dir;
   } catch (const CLI::CallForHelp& e) {
     // When the options requested help, just print it and exit
     return app.exit(e);
@@ -244,7 +245,6 @@ int main(int argc, char* argv[]) noexcept {
         // We can pass a vector to CLI11, but it expects the values to be reversed
         // Instead, pass the count and data pointers from our new_argv vector
         app.parse(new_argv.size(), new_argv.data());
-    std::cout << options::db_dir;
       } catch (const CLI::ParseError& e) {
         return app.exit(e);
       }
