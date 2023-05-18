@@ -34,10 +34,12 @@ void do_build(vector<string> args,
               optional<fs::path> stats_log_path,
               string command_output) noexcept {
   // Make sure the output directory exists
+  std::cout << "g1 " << constants::OutputDir;
   fs::create_directories(constants::OutputDir);
 
   // Also ensure that the cache directory exists
   fs::create_directory(constants::CacheDir);
+  std::cout << "g2 " << constants::CacheDir;
 
   // Set up an ostream to print to if necessary
   unique_ptr<ostream> print_to;
