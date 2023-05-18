@@ -291,7 +291,8 @@ shared_ptr<ContentVersion> DirArtifact::getContent(const shared_ptr<Command>& c)
 
     for (auto& entry : fs::directory_iterator(path.value())) {
       auto name = entry.path().filename();
-      if (name != ".rkr") {
+   //   if (name != ".rkr") {
+      if (name != options::db_dir) {
         result->addEntry(name);
       }
     }

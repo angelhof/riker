@@ -114,6 +114,14 @@ int main(int argc, char* argv[]) noexcept {
       ->description("Frontier")
       ->group("Optimizations");
 
+  app.add_option("--db", options::db_dir,
+      "Path to put the riker db and other temp files")
+      ->type_name("FILE");
+
+  app.add_option("--rikerfile", options::rikerfile,
+      "rikerfile to run")
+      ->type_name("FILE");
+
   /************* Build Subcommand *************/
   auto build = app.add_subcommand("build", "Perform a build (default)");
 
