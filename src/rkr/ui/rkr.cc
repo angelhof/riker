@@ -220,11 +220,8 @@ int main(int argc, char* argv[]) noexcept {
 
   try {
     // Try to parse the arguments as-is
-    std::cout << "a\n";
     app.parse(argc, argv);
-    std::cout << "b\n";
     std::cout << options::db_dir;
-    std::cout << "c\n";
   } catch (const CLI::CallForHelp& e) {
     // When the options requested help, just print it and exit
     return app.exit(e);
@@ -246,11 +243,8 @@ int main(int argc, char* argv[]) noexcept {
       try {
         // We can pass a vector to CLI11, but it expects the values to be reversed
         // Instead, pass the count and data pointers from our new_argv vector
-    std::cout << "a1\n";
         app.parse(new_argv.size(), new_argv.data());
-    std::cout << "b1\n";
     std::cout << options::db_dir;
-    std::cout << "c1\n";
       } catch (const CLI::ParseError& e) {
         return app.exit(e);
       }

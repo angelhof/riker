@@ -12,19 +12,13 @@ int main(int argc, char** argv) {
 
   char* Buildfile = argv[1];
   //const char* Buildfile = "Rikerfile";
-  printf("%s\n", Buildfile);
   int newargc = argc - 1;
   for (int i = 1; i < argc; i++) {
 	argv[i-1] = argv[i];
   }
   argv[newargc] = NULL;
-  for (int i = 0; i < newargc; i++) {
-	printf("%s ", argv[i]);
-  }
-  printf("\na\n");
 
   execv(Buildfile, argv);
-  printf("b\n");
 
   // If we reach this point, the buildfile was not executable. Is it readable?
   if (faccessat(AT_FDCWD, Buildfile, R_OK, AT_EACCESS) == 0) {
@@ -38,11 +32,6 @@ int main(int argc, char** argv) {
     for (int i = 0; i <= newargc; i++) {
       sh_argv[i + 1] = argv[i];
     }
-    printf("shellargv");
-    for (int i = 0; i < newargc+2; i++) {
-      printf("%s ", sh_argv[i]);
-    }
-    printf("\ndone\n");
 
     execv(ShellCommand, sh_argv);
 
