@@ -7,7 +7,7 @@
 #include "data/Trace.hh"
 #include "ui/commands.hh"
 #include "util/TracePrinter.hh"
-#include "util/constants.hh"
+//#include "util/constants.hh"
 
 using std::cout;
 using std::ofstream;
@@ -22,7 +22,7 @@ namespace fs = std::filesystem;
  */
 void do_trace(vector<string> args, string output, fs::path dbDir) noexcept {
   auto DatabaseFilename = dbDir / "db";
-  auto trace = TraceReader::load(constants::DatabaseFilename);
+  auto trace = TraceReader::load(DatabaseFilename);
   FAIL_IF(!trace) << "A trace could not be loaded. Run a full build first.";
 
   // Are we printing to stdout or a file?
