@@ -74,7 +74,7 @@ TraceFile TraceFile::create() noexcept {
   TraceFile result;
 
   // Create a temporary file to hold the trace
-  result.fd = ::open(".", O_RDWR | O_TMPFILE, 0644);
+  result.fd = ::open("/tmp", O_RDWR | O_TMPFILE, 0644);
   if (result.fd == -1) {
     // Did the open fail because O_TMPFILE isn't supported?
     if (errno == EOPNOTSUPP) {
