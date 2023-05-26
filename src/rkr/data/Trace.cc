@@ -89,9 +89,10 @@ TraceFile TraceFile::create() noexcept {
       }
 
       // Unlink the temporary file so it is anonymous
-      if (::unlink(tempname)) {
-        WARN << "Failed to unlink temporary file: " << ERR;
-      }
+      // [PaSH]
+      //if (::unlink(tempname)) {
+      //  WARN << "Failed to unlink temporary file: " << ERR;
+      //}
 
     } else {
       WARN << "Failed to open temporary file: " << ERR;
