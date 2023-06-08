@@ -1,12 +1,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include "data/Trace.hh"
 #include "runtime/Build.hh"
 #include "ui/commands.hh"
-#include "util/constants.hh"
 #include "util/options.hh"
+
+namespace fs = std::filesystem;
 
 using std::cout;
 using std::endl;
@@ -16,9 +18,10 @@ using std::vector;
 /**
  * Run the `check` subcommand
  */
-void do_check(vector<string> args) noexcept {
+void do_check(vector<string> args, fs::path dbDir) noexcept {
   // Load the build trace
-  auto trace = TraceReader::load(constants::DatabaseFilename);
+  auto DatabaseFilename = dbDir / "db";
+  auto trace = TraceReader::load(DatabaseFilename);
   FAIL_IF(!trace) << "A trace could not be loaded. Run a full build first.";
   auto root_cmd = trace->getRootCommand();
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 
 enum class FingerprintLevel { None, Local, All };
 
@@ -32,8 +33,12 @@ namespace options {
   /// Enable file-staging cache
   inline bool enable_cache = true;
 
-  /// Eric: Enable frontier mode
+  /// PaSH: Enable frontier mode
   inline bool frontier = false;
+
+  inline std::filesystem::path db_dir = ".rkr";
+
+  inline std::string rikerfile = "Rikerfile";
 
   /// Inject the shared memory tracing library
   inline bool inject_tracing_lib = true;

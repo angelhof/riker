@@ -12,7 +12,6 @@
 #include "runtime/Build.hh"
 #include "runtime/env.hh"
 #include "ui/commands.hh"
-#include "util/constants.hh"
 #include "util/stats.hh"
 
 namespace fs = std::filesystem;

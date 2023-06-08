@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include "artifacts/Artifact.hh"
 #include "data/Trace.hh"
@@ -11,7 +12,6 @@
 #include "ui/commands.hh"
 #include "util/Graph.hh"
 #include "util/TracePrinter.hh"
-#include "util/constants.hh"
 #include "util/stats.hh"
 
 using std::cout;
@@ -21,11 +21,13 @@ using std::string;
 using std::stringstream;
 using std::vector;
 
+namespace fs = std::filesystem;
+
 /**
  * Run the `stats` subcommand
  * \param list_artifacts  Should the output include a list of artifacts and versions?
  */
-void do_stats(vector<string> args, bool list_artifacts) noexcept {
+void do_stats(vector<string> args, bool list_artifacts, fs::path dbDir) noexcept {
   // Turn on input/output tracking
   options::track_inputs_outputs = true;
 
@@ -33,7 +35,8 @@ void do_stats(vector<string> args, bool list_artifacts) noexcept {
   reset_stats();
 
   // Load the serialized build trace
-  auto trace = TraceReader::load(constants::DatabaseFilename);
+  auto DatabaseFilename = dbDir / "db";
+  auto trace = TraceReader::load(DatabaseFilename);
   FAIL_IF(!trace) << "A trace could not be loaded. Run a full build first.";
 
   // Emulate the trace
