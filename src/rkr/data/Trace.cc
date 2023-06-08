@@ -74,7 +74,7 @@ TraceFile TraceFile::create() noexcept {
   TraceFile result;
 
   // Create a temporary file to hold the trace
-  result.fd = ::open("/tmp", O_RDWR | O_TMPFILE, 0644);
+  result.fd = ::open(".", O_RDWR | O_TMPFILE, 0644);
   if (result.fd == -1) {
     // Did the open fail because O_TMPFILE isn't supported?
     if (errno == EOPNOTSUPP) {
@@ -87,12 +87,6 @@ TraceFile TraceFile::create() noexcept {
         WARN << "Failed to create temporary file with mkstemp: " << ERR;
         return result;
       }
-
-      // Unlink the temporary file so it is anonymous
-      // [PaSH]
-      //if (::unlink(tempname)) {
-      //  WARN << "Failed to unlink temporary file: " << ERR;
-      //}
 
     } else {
       WARN << "Failed to open temporary file: " << ERR;
