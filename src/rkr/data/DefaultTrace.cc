@@ -53,7 +53,8 @@ void DefaultTrace::sendTo(IRSink& handler) noexcept {
   handler.usingRef(*this, _root_command, Ref::Exe);
 
   // Create a rkr-build command
-  auto cmd_args = vector<string>{"rkr-launch"};
+  // [pash]
+  auto cmd_args = vector<string>{"rkr-launch", options::rikerfile};
   cmd_args.insert(cmd_args.end(), _args.begin(), _args.end());
   auto rkr_build_cmd = make_shared<Command>(cmd_args);
 

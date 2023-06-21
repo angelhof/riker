@@ -159,8 +159,12 @@ namespace env {
 
   fs::path getTempPath() noexcept {
     // Make sure the temporary directory exsits
-    fs::path tmpdir = ".rkr/tmp";
-    fs::create_directories(".rkr/tmp");
+    //fs::path tmpdir = ".rkr/tmp";
+    //fs::create_directories(".rkr/tmp");
+
+    //PaSH
+    fs::path tmpdir = options::db_dir / "tmp";
+    fs::create_directories(tmpdir);
 
     // Create a unique temporary path
     fs::path result;

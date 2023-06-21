@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include <unistd.h>
 
@@ -13,12 +14,13 @@
 #include "ui/commands.hh"
 #include "util/Graph.hh"
 #include "util/TracePrinter.hh"
-#include "util/constants.hh"
 
 using std::ofstream;
 using std::string;
 using std::stringstream;
 using std::vector;
+
+namespace fs = std::filesystem;
 
 /**
  * Run the `graph` subcommand
@@ -31,7 +33,8 @@ void do_graph(vector<string> args,
               string output,
               string type,
               bool show_all,
-              bool no_render) noexcept {
+              bool no_render,
+              fs::path dbDir) noexcept {
   // Turn on input/output tracking
   options::track_inputs_outputs = true;
 
@@ -43,7 +46,8 @@ void do_graph(vector<string> args,
   if (output.find('.') == string::npos) output += "." + type;
 
   // Load the build trace
-  auto trace = TraceReader::load(constants::DatabaseFilename);
+  auto DatabaseFilename = dbDir / "db";
+  auto trace = TraceReader::load(DatabaseFilename);
   FAIL_IF(!trace) << "A trace could not be loaded. Run a full build first.";
   auto root_cmd = trace->getRootCommand();
 

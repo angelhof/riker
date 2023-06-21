@@ -5,12 +5,19 @@
 #include <string.h>
 #include <unistd.h>
 
-#define Buildfile "Rikerfile"
 #define ShellCommand "/bin/sh"
 
 int main(int argc, char** argv) {
   // First, try to execute the root build file
-  argv[0] = Buildfile;
+
+  char* Buildfile = argv[1];
+  //const char* Buildfile = "Rikerfile";
+  int newargc = argc - 1;
+  for (int i = 1; i < argc; i++) {
+	argv[i-1] = argv[i];
+  }
+  argv[newargc] = NULL;
+
   execv(Buildfile, argv);
 
   // If we reach this point, the buildfile was not executable. Is it readable?
@@ -18,16 +25,20 @@ int main(int argc, char** argv) {
     // The buildfile is not executable, but we have read access. Run it with /bin/sh
 
     // First, build a new argv array that starts with /bin/sh
-    char* new_argv[argc + 2];
-    new_argv[0] = ShellCommand;
+    char* sh_argv[newargc + 2];
+    sh_argv[0] = ShellCommand;
 
     // Copy the original arguments, including the NULL terminator at argv[argc]
-    for (int i = 0; i <= argc; i++) {
-      new_argv[i + 1] = argv[i];
+    for (int i = 0; i <= newargc; i++) {
+      sh_argv[i + 1] = argv[i];
     }
 
-    execv(ShellCommand, new_argv);
-    perror("Failed to run " Buildfile " with shell " ShellCommand);
+    execv(ShellCommand, sh_argv);
+
+    fprintf(stderr, "Failed to run %s with shell %s", Buildfile, ShellCommand);
+    perror("");
+
+    //perror("Failed to run " Buildfile " with shell " ShellCommand);
     exit(2);
   }
 

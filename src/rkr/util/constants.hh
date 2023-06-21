@@ -7,17 +7,18 @@ namespace fs = std::filesystem;
 // Namespace to contain global flags that control build behavior
 namespace constants {
   /// What is the name of the build state directory?
-  const fs::path OutputDir = ".rkr";
+  //const fs::path OutputDir = ".rkr";
+  extern fs::path OutputDir;
 
   /// What is the name of the build database?
-  const fs::path DatabaseFilename = OutputDir / "db";
+  extern fs::path DatabaseFilename;
 
   /// What is the name of the new build database?
-  const fs::path NewDatabaseFilename = OutputDir / "newdb";
+  extern fs::path NewDatabaseFilename;
 
   /// Where are cached files saved?
-  const fs::path CacheDir = OutputDir / "cache";
+  extern fs::path CacheDir;
 
   /// Where are cached files saved?
-  const fs::path NewCacheDir = OutputDir / "newcache";
+  extern fs::path NewCacheDir;
 }

@@ -386,6 +386,12 @@ void Tracer::handleSyscall(Build& build, Thread& t) noexcept {
 
    //WARN << entry.getName() << " call at " << (void*)regs.INSTRUCTION_POINTER << " in " <<
    //t.getCommand();
+   if (!options::frontier) {
+    if (std::find(std::begin(blockedCalls), std::end(blockedCalls), entry.getName()) != std::end(blockedCalls)) {
+        WARN<<"non frontier call for " << entry.getName();
+        std::exit(159);
+    }
+   }
 
   if (entry.isTraced()) {
     LOG(trace) << t << ": stopped on syscall " << entry.getName();
@@ -556,14 +562,12 @@ shared_ptr<Process> Tracer::launchTraced(Build& build, const shared_ptr<Command>
       } else {
         // [pash]
         if (SyscallTable<Build>::get(i).isTraced()) {
-          if (!options::frontier) {
-            if (std::find(std::begin(blockedCalls), std::end(blockedCalls), SyscallTable<Build>::get(i).getName()) != std::end(blockedCalls)) {
-              WARN << "Attempted to call blocked syscall outside of frontier, exiting.. Call: " << SyscallTable<Build>::get(i).getName();
-              bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
-              bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
-              std::exit(159);
-            }
-          }
+ //         if (!options::frontier) {
+ //           if (std::find(std::begin(blockedCalls), std::end(blockedCalls), SyscallTable<Build>::get(i).getName()) != std::end(blockedCalls)) {
+ //             bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));
+ //             bpf.push_back(BPF_STMT(BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS));
+  //          }
+   //       }
 
           // If this syscall is traced, jump to the trace handler
           bpf.push_back(BPF_JUMP(BPF_JMP | BPF_JEQ | BPF_K, i, 0, 1));

@@ -114,6 +114,16 @@ int main(int argc, char* argv[]) noexcept {
       ->description("Frontier")
       ->group("Optimizations");
 
+  
+  fs::path db_dir = ".rkr";
+  app.add_option("--db", db_dir,
+      "Path to put the riker db and other temp files")
+      ->type_name("FILE");
+
+  app.add_option("--rikerfile", options::rikerfile,
+      "rikerfile to run")
+      ->type_name("FILE");
+
   /************* Build Subcommand *************/
   auto build = app.add_subcommand("build", "Perform a build (default)");
 
@@ -196,17 +206,17 @@ int main(int argc, char* argv[]) noexcept {
   // every argument in std::ref to pass values by reference.
 
   // build subcommand
-  build->final_callback([&] { do_build(args, stats_log, command_output); });
+  build->final_callback([&] { do_build(args, stats_log, command_output, db_dir); });
   // audit subcommand
   audit->final_callback([&] { do_audit(args, command_output); });
   // check subcommand
-  check->final_callback([&] { do_check(args); });
+  check->final_callback([&] { do_check(args, db_dir); });
   // trace subcommand
-  trace->final_callback([&] { do_trace(args, trace_output); });
+  trace->final_callback([&] { do_trace(args, trace_output, db_dir); });
   // graph subcommand
-  graph->final_callback([&] { do_graph(args, graph_output, graph_type, show_all, no_render); });
+  graph->final_callback([&] { do_graph(args, graph_output, graph_type, show_all, no_render, db_dir); });
   // stats subcommand
-  stats->final_callback([&] { do_stats(args, list_artifacts); });
+  stats->final_callback([&] { do_stats(args, list_artifacts, db_dir); });
 
   /************* Argument Parsing *************/
 
